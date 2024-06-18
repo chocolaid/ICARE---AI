@@ -44,7 +44,7 @@ Navigate into the **Backend folder** using command:<br/>
 
 
 
-
+**Installing necessary packages via pip:**
  `
 tensorflow
 scikit-learn
