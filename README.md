@@ -1,10 +1,18 @@
 # Team-Spectra
 
-## **Cancer Prediction AI:** Jarvis Documentation<br/>
+## **ICARE:** Documentation<br/>
 Overview
-Jarvis is a sophisticated AI model designed to predict cancer using TensorFlow. It leverages deep learning techniques to analyze medical imaging and clinical data, providing accurate predictions to assist healthcare professionals.
+ICARE is an AI-powered platform offering comprehensive medical assistance and emergency support. Utilizing advanced AI for voice, Image and text chat, ICARE detects accidents using device sensors and a well written algorithm that promptly notifies emergency services. We connect users with tailored care services in their area, prioritizing the well-being of loved ones with efficient and responsive medical support.
 
-**Features**<br/>
+
+## **Features**<br/>
+**Emergency Alarm**:<br/> 
+An in-built feature that can be customized by users to perform certain tasks when emergency mode is triggered. <br/>
+
+**Live Voice Chat**:<br/>
+A live assistant voice chat that responds to medical related question with an In-built feature to trigger an emergency alarm when Emergency service is needed <br/>
+
+
 *High Accuracy:* Utilizes state-of-the-art deep learning algorithms.<br/>
 *Scalable:* Can handle large datasets.
 User-Friendly: Easy integration with existing healthcare systems.<br/>
