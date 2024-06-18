@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Icare",
+    "slug": "icare",
+    "version": "1.0.0",
+    "plugins": [
+      [
+        "react-native-permissions",
+        {
+          "iosPermissions": [
+            "AppTrackingTransparency",
+            "Bluetooth",
+            "CalendarsWriteOnly",
+            "Notifications",
+            "SpeechRecognition"
+          ]
+        }
+      ],
+      [
+        "expo-build-properties", { "android": { "usesCleartextTraffic": true } }
+      ]
+    ],
+    "config": {
+      "googleMaps": {
+        "apiKey": "AIzaSyCyjxgCh_Q8aDAApAVUmpVfwxfoBBjYe4Q"
+      }
+    },
+    "android": {
+      "package": "oec.apps.icare"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ebe02abf-7001-421b-b6b6-683dd0cdbb5f"
+      }
+    },
+    "owner": "oecapps",
+    "ios": {
+      "bundleIdentifier": "oec.apps.icare"
+    }
+  }
+}

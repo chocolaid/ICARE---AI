@@ -1,0 +1,37 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/Blogger Sans-Bold Italic.otf",
+      "sha1": "69ee3f5b0c6ef7b31e6ccfaefbab10220d3f60a8"
+    },
+    {
+      "path": "assets/fonts/Blogger Sans-Bold.otf",
+      "sha1": "31cb542af52f2b7496fb95ddf43019a2fe529baf"
+    },
+    {
+      "path": "assets/fonts/Blogger Sans-Italic.otf",
+      "sha1": "4557cb6133e727cebfd21721b282180b9902c733"
+    },
+    {
+      "path": "assets/fonts/Blogger Sans-Light.otf",
+      "sha1": "d038dfdccadfbc7ea972fd348fdefa0dc10316eb"
+    },
+    {
+      "path": "assets/fonts/Blogger Sans-Medium Italic.otf",
+      "sha1": "84f82613ebca268b7d2407d2e11e512c34bece1f"
+    },
+    {
+      "path": "assets/fonts/Blogger Sans-Medium.otf",
+      "sha1": "81cd33d5be8cf0feba4e3acbe8845a1f8b89b089"
+    },
+    {
+      "path": "assets/fonts/BloggerSans.otf",
+      "sha1": "8bfa472c76342662acfa3043ab747735d9e49403"
+    },
+    {
+      "path": "assets/fonts/Bsl.otf",
+      "sha1": "0399c29e84c1f9a960fc9b045cd670498ac4c698"
+    }
+  ]
+}
