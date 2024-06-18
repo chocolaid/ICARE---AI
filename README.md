@@ -41,10 +41,18 @@ Navigate into the **Backend folder** using command:<br/>
 
 `cd Team-Spectra/backend`<br/>
 
+Run command: `chmod +x ./setup.sh && ./setup.sh` this will setup the backend server<br/>
+
+Optional you can navigate into the following directories and run the `setup shell scripts`.
+<ul>
+<li>nodeservers</li>
+<li>cancerai</li>
+<li>speech</li>
+</ul>
+#
 
 
 
-**Installing necessary packages via pip:**
  `
 tensorflow
 scikit-learn
