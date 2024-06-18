@@ -47,6 +47,7 @@ Optionally you can navigate into the following directories and run the `setup sh
 <li>nodeservers</li>
 <li>cancerai</li>
 <li>speech</li>
+<li>webcancer.ai</li>
 </ul>
 <br/>
 <br/>
