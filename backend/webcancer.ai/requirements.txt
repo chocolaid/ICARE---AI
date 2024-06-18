@@ -1,0 +1,11 @@
+tensorflow
+scikit-learn
+Pillow
+numpy
+matplotlib
+pandas
+Flask
+flask-wtf
+Werkzeug
+python-dotenv
+tf_keras
