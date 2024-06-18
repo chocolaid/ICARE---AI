@@ -9,6 +9,12 @@ ICARE is an AI-powered platform offering comprehensive medical assistance and em
 **Emergency Alarm**:<br/> 
 An in-built feature that can be customized by users to perform certain tasks when emergency mode is triggered. <br/>
 
+**What's Emergency Mode?**<br/>
+Emergency Mode is an integrated feature designed to be activated in response to accidents, chat queries, and voice interactions. It can be customized to perform tasks such as calling the nearest hospitals, sending distress messages to emergency contacts, and notifying nearby hospitals.<br/>
+
+**Accident Detection**<br/>
+Our system includes advanced accident detection capabilities, leveraging real-time data and sensors to swiftly identify incidents. This feature enables immediate alerts to emergency services, contacts emergency contacts, and notifies nearby hospitals, ensuring rapid response and assistance when it matters most.
+
 **Live Voice Chat**: <br/>
 Introducing Jarvis, a live voice assistant that responds to medical-related questions. Jarvis includes an in-built feature to trigger an emergency alarm when emergency services are needed. <br/>
 
