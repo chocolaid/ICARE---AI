@@ -22,18 +22,29 @@ Introducing Jarvis, a live voice assistant that responds to medical-related ques
 *CanceRx* is an AI-powered image chat scanner designed to detect six distinct types of cancer from shared images. Its goal is to assist users in early cancer detection, potentially improving treatment outcomes and saving lives. <br/>
 
 **Live Chat**: <br/>
-Powered by Jarvis, a live chat assistant that supports both images and text responses for medical queries. It includes an in-built feature to trigger an emergency alarm when emergency services are needed. <br/>
+Powered by Jarvis, a live chat assistant that supports both images and text responses for medical queries. It includes an in-built feature to trigger an emergency alarm when emergency services are needed. <br/><br/>
 
-*High Accuracy:* Utilizes state-of-the-art deep learning algorithms.<br/>
-*Scalable:* Can handle large datasets.
-User-Friendly: Easy integration with existing healthcare systems.<br/>
-**System Requirements**<br/>
-*Operating System:* Linux, macOS, Windows
-Python Version: 3.6 or higher<br/>
-**Model Build Code:**
-To check Jarvis Build code [Colab Notebook](https://colab.research.google.com/drive/1DF9E0Pj92Yb8F_1unNu5MZ7fbYCGiDnh)
 
-## Requirements
+## Setup Guide
+**Requirements:**<br/>
+`A VPS server running on Ubuntu v24.04 LTS with over 20GB of storage available that has support for GPU with access to root directory`<br/>
+
+`Python3, NodeJS V22, latest version of GIT`
+
+**Backend Server Setup:**<br/>
+
+Clone the github repository using command:<br/>
+
+`git clone https://github.com/DATICAN-UNDERGRADUATES-COMPETITION/Team-Spectra.git`<br/>
+
+Navigate into the **Backend folder** using command:<br/>
+
+`cd Team-Spectra/backend`<br/>
+
+
+
+
+
  `
 tensorflow
 scikit-learn
