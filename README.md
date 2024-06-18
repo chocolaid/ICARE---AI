@@ -40,6 +40,10 @@ Testing the cancer prediction model [with link](https://colab.research.google.co
 Contact
 For more information, please contact sarafasatar@gmail.com.
 
+## Setup Instructions
+
+Please Read [This Instructions](https://github.com/DATICAN-UNDERGRADUATES-COMPETITION/Team-Spectra/tree/main/backend#icare)
+
 Additional Resources
 For further details and to run the model in an interactive environment, please refer to the Google Colab notebook.
 
