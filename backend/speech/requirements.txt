@@ -1,0 +1,6 @@
+flask
+google-cloud-speech
+google-cloud-texttospeech
+werkzeug
+google-generativeai
+flask-cors

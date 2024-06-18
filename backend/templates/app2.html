@@ -1,0 +1,18 @@
+<!Doctype HTML>
+<html>
+    <head>
+        <title>Testing Audio Requests</title>
+    </head>
+    <body>
+        {% if audio_filename %}
+            {{audio_filename}}
+        {%else%}
+        <form method="POST" enctype="multipart/form-data">
+            {{form.hidden_tag()}}
+            {{form.audio.label}}
+            {{form.audio}}
+            {{form.submit}}
+        </form>
+        {%endif%}
+    </body>
+</html>

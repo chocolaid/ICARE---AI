@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "symmetric-hull-425105-k8",
+  "private_key_id": "e16d6b77cbc80d6e7a1a57e89754754d5f459436",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDTHgmuBGntctxM\nYxjRpFg8SUvkY00e9bbSsH9lJ+jgrCNluPsyXHOgo9XyfH/SQgLwjaOku8+Yj36e\naJqScYM5PArJ/D9TomnLhKJ5P+Y9hZZnEVxFlaYTo3ZBGqbRyx2XKAPjl80fn1HH\nJ2HgCcpngb7O0mRpAdAwYK7MESKw1tyIUGQ4LV55BFi3RFLIB710F8s0Payl4aCr\nvQW3m3FQUNeN4Iq9jzFljnDEnvY1r+7PihwetStRTqsyrPMoSl3LWaXqiyRmhfoF\ntLVGZU52/kZqsx98BFy05naXcf8eLqh5HKkPyCS0Ez9Agso8I9w9tAaLvrMvZN9M\ndtR0CFoTAgMBAAECggEAA+cUv7pGKQUMDH9yeIGkveyO8hhh1xYsvIVVvY140Rpt\nhxZd0mcCHjCZJmPlywG8Yy0DHur34faZHR2K6fUeO2MgQe6fTxD8Cq6XgE1NmMqM\n5rfb8E9dZBSL/ZUcC1nJYL91HvJx8Mk1rkxMk2Mq8jHkUJd0ErrdWd+Xq58PeJxf\nl2gn6VzSMep6TkaKFrstgbVU1Wbk7hGaXcpvmmql8x3at7ytDpn8TZ9gHVyjSrZT\nBH6776IfvtmzdQEEAyuLGO1wQCh8HZgotq9JddNa8h7ft0NCWuBt6USLwEuN+uSB\nvQaRKu/x4F7qQrrQ2mSHcL1CLN6ofJ3H0toZs4oHPQKBgQD31iSFBMxWYIawo96A\npiNqyGbC5ZYUnasoYemSqZJ6D79SnPzv5ls7qYWhumgdDf1/3ZdmOlOyxsXUVzqL\nInFaeoO0iyrCZ6LLIzuDx9DkhLv9c0W2mWtmPacnRkaXyiL8Un7uEWF/PDXnDKE3\nShM1s8w4YzPNx7HmfrXm1vjBjwKBgQDaEkOus5gQtY/jS1JNsMkem3R71/T33kLY\nWbdDHnbEzJoBsv+KguHH9qJ8QzbQ1w7wF7gWRtZ0oynKjtp442SGi1xMG+tdpahE\nycAOf8fqbUdJCxWWE4+at2NwhqvtNAkA4OzuISMsN1qfYgktQyBto9q45RCUNGZ9\nsErLq0aVPQKBgBq/WMemYes8lazAssXNqGrg3/5OyujEr3E3R/8VIALeajafTMkT\nYmtI+2wd8xiXpvFC2BEnYFseCsHE/EOB3xv1tvsoPeAnUTF9RvINAaV4EdXjt/Vi\nD25EXyLk+b9uCGKVAK/u3kfeFq8t9MRD0VjtY6/+PNwLnk6TBEy6jLRPAoGBAI4O\nP9DaZUDdRXJHasH5W8p4chUKxSWCwAC30M4EVlI1Bk39EMJmKDZez9Iq5tZ8gdqd\nWOoKE0G/2EV/cYo2dxG+Ts21kkla1Jaa5mWLj+uCbGGEuvccnvumYzy2PeEzeHn+\nC9nD9GmlVX9mGZxGkiVaC+1OKtKgn/NYmCC83inxAoGBAK3JLaww0fp0lMHIc4ue\nqXkiefIMTrmdl6RF6RiuQN7GGe/MfpLwoxfvcWJhvQNxd43P4cGadAl96DJhT+oE\nvlUDzNoRYdFva7hDXxqLyFxqFmnUSq5k0ENj9YDXGWyoLP1UcXzQHcXD2UvtMrwA\nX3XQBvaOMLpKh23UgWNeETbN\n-----END PRIVATE KEY-----\n",
+  "client_email": "speech-demo@symmetric-hull-425105-k8.iam.gserviceaccount.com",
+  "client_id": "111605881870453216631",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/speech-demo%40symmetric-hull-425105-k8.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
