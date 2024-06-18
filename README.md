@@ -47,6 +47,7 @@ Optionally you can navigate into the following directories and run the `setup sh
 <li>nodeservers</li>
 <li>cancerai</li>
 <li>speech</li>
+<li>webcancer.ai</li>
 </ul>
 <br/>
 <br/>
@@ -56,8 +57,6 @@ Optionally you can navigate into the following directories and run the `setup sh
 Navigate into the **Frontend folder** using command:<br/>
 
 `cd Team-Spectra/frontend/mobile/`<br/>
-
-To build and run a React Native application for both Android and iOS platforms, you typically use different commands due to the different build environments required for each platform. Here’s how you can set up commands to build and run your app on both platforms:
 
 ### Prerequisites
 
@@ -114,7 +113,7 @@ npm run android
 npx react-native run-ios --simulator="iPhone 11"
 ```
 
-Building a release version of a React Native application involves preparing the app for deployment to app stores or distribution to users. Here are the steps and commands to build release versions for both Android and iOS platforms:
+###Building a release version of
 
 ### Prerequisites
 
@@ -132,11 +131,6 @@ Before proceeding, ensure you have completed the following prerequisites:
 3. **Node.js & npm:**
    - Node.js installed on your machine.
 
-### Additional Notes
-
-- **Metro Bundler:** Both commands start the Metro Bundler, which bundles your JavaScript code for the React Native app.
-- **Debugging:** You can debug your React Native app on both platforms using their respective tools (e.g., Chrome Developer Tools for Android, Xcode for iOS).
-- **Configuration:** Ensure your development environment is set up correctly, including SDK paths and environment variables.
 
 ### Building Release Versions
 
@@ -204,6 +198,7 @@ To build a release version of your Android app, follow these steps:
 #### 2. iOS Release Build
 
 To build a release version of your iOS app, follow these steps:
+read the todo.txt and upload the info.plist with the content
 
 ##### Step-by-Step Instructions:
 
@@ -211,7 +206,7 @@ To build a release version of your iOS app, follow these steps:
    - Navigate to the `ios` folder of your React Native project and open the `.xcworkspace` file in Xcode.
 
      ```bash
-     open ios/YourProjectName.xcworkspace
+     open ios/Icare.xcworkspace
      ```
 
 2. **Configure Signing & Capabilities:**
@@ -229,26 +224,3 @@ To build a release version of your iOS app, follow these steps:
    - Once the archive is complete, Xcode Organizer will open.
    - Select the archived app and click `Distribute App`.
    - Follow the prompts to export the app for distribution.
-
-
- `
-## References
-**Dataset:** [HAM10000 Dataset](https://www.kaggle.com/datasets/kmader/skin-cancer-mnist-ham10000)<br/>
-**Input Dataset:** [HMINST_28_28_RGB.csv](https://www.kaggle.com/code/dhruv1234/ham10000-skin-disease-classification/input?select=hmnist_28_28_RGB.csv)
-
-## Evaluate predictions
-
-Testing the cancer prediction model [with link](https://colab.research.google.com/drive/1DF9E0Pj92Yb8F_1unNu5MZ7fbYCGiDnh#scrollTo=N0_ouFsoE_D2)
-
-Contact
-For more information, please contact sarafasatar@gmail.com.
-
-## Setup Instructions
-
-Please Read [This Instructions](https://github.com/DATICAN-UNDERGRADUATES-COMPETITION/Team-Spectra/tree/main/backend#icare)
-
-Additional Resources
-For further details and to run the model in an interactive environment, please refer to the Google Colab notebook.
-
-Conclusion
-Jarvis provides a reliable AI solution for cancer prediction, aiding early diagnosis and improving treatment outcomes. By following the steps outlined in this documentation, you can set up and deploy Jarvis effectively.
