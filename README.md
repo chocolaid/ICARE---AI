@@ -9,9 +9,14 @@ ICARE is an AI-powered platform offering comprehensive medical assistance and em
 **Emergency Alarm**:<br/> 
 An in-built feature that can be customized by users to perform certain tasks when emergency mode is triggered. <br/>
 
-**Live Voice Chat**:<br/>
-A live assistant voice chat that responds to medical related question with an In-built feature to trigger an emergency alarm when Emergency service is needed <br/>
+**Live Voice Chat**: <br/>
+Introducing Jarvis, a live voice assistant that responds to medical-related questions. Jarvis includes an in-built feature to trigger an emergency alarm when emergency services are needed. <br/>
 
+**Cancer Detection from Shared Images**: <br/>
+*CanceRx* is an AI-powered image chat scanner designed to detect six distinct types of cancer from shared images. Its goal is to assist users in early cancer detection, potentially improving treatment outcomes and saving lives. <br/>
+
+**Live Chat**: <br/>
+Powered by Jarvis, a live chat assistant that supports both images and text responses for medical queries. It includes an in-built feature to trigger an emergency alarm when emergency services are needed. <br/>
 
 *High Accuracy:* Utilizes state-of-the-art deep learning algorithms.<br/>
 *Scalable:* Can handle large datasets.
