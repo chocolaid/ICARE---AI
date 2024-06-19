@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}">
+    <script defer src="{{url_for('static', filename='index.js')}}"></script>
+</head>
+<body>
+    <div class="logo"><img src="{{url_for('static', filename='icare.png')}}" alt=""></div>
+    <div class="hero">
+        <label for="input-file" id="drop-area">
+            <form method="POST" action="/" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <p><input type="file" name="image"></p>
+                <p><input type="submit" value="Upload Image"></p>
+            </form>
+            <div id="img-view">
+                <img src="{{url_for('static', filename='Icon White.png')}}">
+                <p>Drag and drop or click here <br> to upload skin image</p>
+                <span>Uplaod any images from computer</span>
+            </div>
+            <div id="upload-img">
+                {% if class_ind is not none %}
+                <div class="prediction">
+                    <h2>Predictions: {{ classes[class_ind] }}</h2>
+                    <p>{{ classes[class_ind] }}</p>
+                    <img src="{{ url_for('static', filename=pic_name) }}" alt="Uploaded Image">
+                </div>
+                {% endif %}
+            </div>
+        </label>
+    </div>
+</body>
+</html>
+
