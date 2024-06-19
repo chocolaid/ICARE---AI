@@ -16,7 +16,23 @@ User-Friendly: Easy integration with existing healthcare systems.<br/>
 Python Version: 3.6 or higher<br/>
 **Model Build Code:**
 To check Jarvis Build code [Colab Notebook](https://colab.research.google.com/drive/1DF9E0Pj92Yb8F_1unNu5MZ7fbYCGiDnh)
-
+**Quick Model Usage**
+1. [Clone this Repo Link](https://github.com/DATICAN-UNDERGRADUATES-COMPETITION/Team-Spectra/tree/main/backend/cancerai)
+2. Head to the cancerai directory on your machine
+3. pip install -r requirements.txt or just install these packages
+`tensorflow
+scikit-learn
+Pillow
+numpy
+matplotlib
+pandas
+Flask
+flask-wtf
+Werkzeug
+python-dotenv
+tf_keras`
+4. python app.py (or Linux: python3 app.py) then head to your localhost:8900 or 127.0.0.1:8900 on your webrowser
+5. 5. Upload any cancerous Jpeg Images and See the prediction 
 
 ## **Features**<br/>
 **Emergency Alarm**:<br/> 
