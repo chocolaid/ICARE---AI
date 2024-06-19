@@ -17,7 +17,7 @@ Python Version: 3.6 or higher<br/>
 **Model Build Code:**
 To check Jarvis Build code [Colab Notebook](https://colab.research.google.com/drive/1DF9E0Pj92Yb8F_1unNu5MZ7fbYCGiDnh)<br/>
 
-**Quick Model Usage[Te real Prediction Model testing Jarvis]**
+**Quick Model Usage[The real Prediction Model testing Jarvis]**
 1. [Clone this Repo Link](https://github.com/DATICAN-UNDERGRADUATES-COMPETITION/Team-Spectra/tree/main/backend/webcancer.ai)
 2. Head to the cancerai directory on your machine
 3. pip install -r requirements.txt or just install these packages
