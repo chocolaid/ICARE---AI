@@ -183,24 +183,23 @@ const HomeScreen = ({ navigation }) => {
       });
 
       const result = await chat.sendMessage([{ text: t }]);
-      const response = await result.response;
-      let text = await response.text();
-      const jsonStart = text.indexOf('```json');
-      const jsonEnd = text.lastIndexOf('```');
+const response = await result.response;
+let text = await response.text();
 
-      if (jsonStart !== -1 && jsonEnd !== -1) {
-        let jsonText = text.substring(jsonStart + 7, jsonEnd);
-        jsonText = jsonText.replace(/[\u0000-\u001F]+/g, "");
-        try {
-          const json = JSON.parse(jsonText);
-          if (json.emergency) {
-            text = json.message;
-            navigation.navigate('Emergency', { lastPrompt: t, aiResponse: text });
-          }
-        } catch (error) {
-          console.error("Error parsing JSON:", error);
-        }
-      }
+// Use regex to find JSON block
+const jsonMatch = text.match(/```json([\s\S]*?)```/);
+if (jsonMatch) {
+  let jsonText = jsonMatch[1].replace(/[\u0000-\u001F]+/g, ""); // Removing control characters
+  try {
+    const json = JSON.parse(jsonText);
+    if (json.emergency) {
+      text = json.message;
+      navigation.navigate('Emergency', { lastPrompt: t, aiResponse: text });
+    }
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+  }
+}
 
       const aiMessage = {
         id: messages.length + 2,
