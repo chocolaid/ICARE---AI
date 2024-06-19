@@ -4,6 +4,19 @@
 Overview
 ICARE is an AI-powered platform offering comprehensive medical assistance and emergency support. Utilizing advanced AI for voice, Image and text chat, ICARE detects accidents using device sensors and a well written algorithm that promptly notifies emergency services. We connect users with tailored care services in their area, prioritizing the well-being of loved ones with efficient and responsive medical support.
 
+**Overview**
+Jarvis is a sophisticated AI model designed to predict cancer using TensorFlow. It leverages deep learning techniques to analyze medical imaging and clinical data, providing accurate predictions to assist healthcare professionals.
+
+**Features**<br/>
+*High Accuracy:* Utilizes state-of-the-art deep learning algorithms.<br/>
+*Scalable:* Can handle large datasets.
+User-Friendly: Easy integration with existing healthcare systems.<br/>
+**System Requirements**<br/>
+*Operating System:* Linux, macOS, Windows
+Python Version: 3.6 or higher<br/>
+**Model Build Code:**
+To check Jarvis Build code [Colab Notebook](https://colab.research.google.com/drive/1DF9E0Pj92Yb8F_1unNu5MZ7fbYCGiDnh)
+
 
 ## **Features**<br/>
 **Emergency Alarm**:<br/> 
