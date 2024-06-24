@@ -24,7 +24,7 @@ function Emergency({ route }) {
     sendMessageToContacts: false,
     callNearestHospitals: false,
     doNothing: false,
-    messageNearestHospitals: false,
+    messageNearestHospitals: true,
 });
   const [emergencyContacts, setEmergencyContacts] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);

@@ -62,37 +62,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  errorText: {
+    fontSize: 18,
+    color: 'red',
+    textAlign: 'center',
+  },
 });
 
-const hospitalPlaceholder = require('../images/hospital.jpg'); // Import the local image
-const requestCameraPermission = async () => {
-  try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-      {
-        title: 'ICare Location Permission',
-        message:
-          'ICare needs access to your Location ' +
-          'so you can see hospitals near you.',
-        buttonNeutral: 'Ask Me Later',
-        buttonNegative: 'Cancel',
-        buttonPositive: 'OK',
-      },
-    );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('You can use the camera');
-    } else {
-      console.log('Camera permission denied');
-    }
-  } catch (err) {
-    console.warn(err);
-  }
-};
+const hospitalPlaceholder = require('../images/hospital.jpg'); 
+
 const NearbyHospitalsMap = ({ navigation }) => {
-  const GOOGLE_MAPS_API_KEY = 'AIzaSyCyjxgCh_Q8aDAApAVUmpVfwxfoBBjYe4Q'; 
+  const GOOGLE_MAPS_API_KEY = 'AIzaSyCyjxgCh_Q8aDAApAVUmpVfwxfoBBjYe4Q'; // Your API key from your first code
   const [userLocation, setUserLocation] = useState(null);
   const [hospitals, setHospitals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null); 
 
   useEffect(() => {
     const requestLocationPermission = async () => {
@@ -115,6 +99,7 @@ const NearbyHospitalsMap = ({ navigation }) => {
         const location = await GetLocation.getCurrentPosition({
           enableHighAccuracy: true,
           timeout: 60000,
+          provider: 'network'
         });
         setUserLocation({
           latitude: location.latitude,
@@ -127,19 +112,26 @@ const NearbyHospitalsMap = ({ navigation }) => {
           'Location Error',
           'Failed to retrieve current location. Please make sure location services are enabled and try again.'
         );
+        setError('Location Error'); 
+        setIsLoading(false);
         return null;
       }
     };
+
     const fetchNearbyHospitals = async (location) => {
       try {
+        var url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location.latitude},${location.longitude}&radius=1000&type=hospital&key=${GOOGLE_MAPS_API_KEY}`
         const response = await axios.get(
-          `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location.latitude},${location.longitude}&radius=1000&type=hospital&key=${GOOGLE_MAPS_API_KEY}`
+          url
         );
+        console.log('LOG URL:', url);
+        console.log('location:', location)
+        console.log('Hospitals:', response.data);
+
         const operationalHospitals = response.data.results.filter(
           hospital => hospital.business_status === 'OPERATIONAL'
         );
 
-        // Fetch details for each hospital to get phone number
         const hospitalsWithDetails = await Promise.all(operationalHospitals.map(async hospital => {
           const detailsResponse = await axios.get(
             `https://maps.googleapis.com/maps/api/place/details/json?place_id=${hospital.place_id}&key=${GOOGLE_MAPS_API_KEY}`
@@ -153,6 +145,7 @@ const NearbyHospitalsMap = ({ navigation }) => {
         setHospitals(hospitalsWithDetails);
       } catch (error) {
         console.error('Error fetching hospitals:', error);
+        setError('Error fetching hospitals');
       } finally {
         setIsLoading(false);
       }
@@ -167,7 +160,7 @@ const NearbyHospitalsMap = ({ navigation }) => {
         }
       } else {
         Alert.alert('Permission Denied', 'Location permission is required to show nearby hospitals.');
-        requestCameraPermission();
+        setError('Permission Denied');
         setIsLoading(false);
       }
     };
@@ -176,9 +169,9 @@ const NearbyHospitalsMap = ({ navigation }) => {
   }, []);
 
   return (
-    <View style={{ height: '100%', paddingBottom: 50, paddingTop: 0, backgroundColor: '#4445ea' }}>
-      <View style={{ backgroundColor: '#4445EA', height: Dimensions.get('window').height * 0.065, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ color: 'white', fontFamily: 'Blogger Sans-Bold', fontSize: 18 }}>Hospitals Near You</Text>
+    <View style={{ height: '100%', paddingBottom: 50, paddingTop: 0, backgroundColor: 'white' }}>
+      <View style={{ backgroundColor: 'white', height: Dimensions.get('window').height * 0.065, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: '#4445ea', fontFamily: 'Blogger Sans-Bold', fontSize: 24, textAlign: 'left', width: '100%', marginLeft: 25 }}>Hospitals Near You</Text>
       </View>
       <View style={styles.container}>
         {isLoading ? (
@@ -190,57 +183,67 @@ const NearbyHospitalsMap = ({ navigation }) => {
           >
             <View style={styles.loadingContainer}>
               <LottieView
-                source={require('../animations/loading.json')} // Path to your Lottie animation file
+                source={require('../animations/loading.json')}
                 autoPlay
                 loop
               />
             </View>
           </Modal>
+        ) : error ? (
+          <View style={styles.container}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
         ) : (
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={{ flex: 1 }}>
-              {hospitals.map((hospital, index) => {
-                const photoUrl = hospital.photos && hospital.photos.length > 0 
-                  ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${hospital.photos[0].photo_reference}&key=${GOOGLE_MAPS_API_KEY}`
-                  : hospitalPlaceholder;
+              {hospitals.length === 0 ? (
+                <View style={styles.container}>
+                  <Text style={styles.errorText}>No hospitals found nearby.</Text>
+                </View>
+              ) : (
+                hospitals.map((hospital, index) => {
+                  const photoUrl = hospital.photos && hospital.photos.length > 0 
+                    ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${hospital.photos[0].photo_reference}&key=${GOOGLE_MAPS_API_KEY}`
+                    : hospitalPlaceholder;
 
-                return (
-                  <View key={index} style={styles.hospitalContainer}>
-                    <ImageBackground
-                      source={typeof photoUrl === 'string' ? { uri: photoUrl } : photoUrl}
-                      style={styles.imageBackground}
-                    >
-                      <LinearGradient colors={['transparent', 'rgba(0,0,0,0.5)']} style={styles.gradient}>
-                        <Text style={styles.hospitalName}>{hospital.name}</Text>
-                        <Text style={styles.hospitalDetails} numberOfLines={1}>
-                          {`${hospital.vicinity || 'No address available'}`}
-                        </Text>
-                        <Text style={styles.hospitalDetails}>
-                          {`Open Now: ${hospital.opening_hours ? (hospital.opening_hours.open_now ? 'Yes' : 'No') : 'No information available'}`}
-                        </Text>
-                        <Text style={styles.hospitalDetails}>
-                          {`Phone: ${hospital.phone || 'No phone number available'}`}
-                        </Text>
-                      </LinearGradient>
-                    </ImageBackground>
-                    <View style={{ display: 'flex', flexDirection: 'row' }}>
-                      <TouchableOpacity style={styles.directionsButton} onPress={() => navigation.navigate('Map', { coordinates: hospital.geometry.location }, { mylocation: userLocation })}>
-                        <Text style={{ color: 'white', fontFamily: 'Blogger Sans-Medium', fontSize: 18 }}>Get Directions</Text>
-                      </TouchableOpacity>
-                      {hospital.phone && (
-                        <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', height: '100%', padding: 0 }}>
-                          <TouchableOpacity>
-                            <Image style={{ height: 20, width: 20, marginLeft: 20, tintColor: '#4445ea', marginRight: 15 }} source={require('../images/call.png')} />
-                          </TouchableOpacity>
-                          <TouchableOpacity onPress={() => navigation.navigate('Whatsapp', { phone: hospital.phone })}>
-                            <Image style={{ height: 20, width: 20, marginLeft: 5, marginRight: 20, tintColor: '#4445ea' }} source={require('../images/chat.png')} />
-                          </TouchableOpacity>
-                        </View>
-                      )}
+                  return (
+                    <View key={index} style={styles.hospitalContainer}>
+                      <ImageBackground
+                        source={typeof photoUrl === 'string' ? { uri: photoUrl } : photoUrl}
+                        style={styles.imageBackground}
+                      >
+                        <LinearGradient colors={['transparent', 'rgba(0,0,0,0.5)']} style={styles.gradient}>
+                          <Text style={styles.hospitalName}>{hospital.name}</Text>
+                          <Text style={styles.hospitalDetails} numberOfLines={1}>
+                            {`${hospital.vicinity || 'No address available'}`}
+                          </Text>
+                          <Text style={styles.hospitalDetails}>
+                            {`Open Now: ${hospital.opening_hours ? (hospital.opening_hours.open_now ? 'Yes' : 'No') : 'No information available'}`}
+                          </Text>
+                          <Text style={styles.hospitalDetails}>
+                            {`Phone: ${hospital.phone || 'No phone number available'}`}
+                          </Text>
+                        </LinearGradient>
+                      </ImageBackground>
+                      <View style={{ display: 'flex', flexDirection: 'row' }}>
+                        <TouchableOpacity style={styles.directionsButton} onPress={() => navigation.navigate('Map', { coordinates: hospital.geometry.location }, { mylocation: userLocation })}>
+                          <Text style={{ color: 'white', fontFamily: 'Blogger Sans-Medium', fontSize: 18 }}>Get Directions</Text>
+                        </TouchableOpacity>
+                        {hospital.phone && (
+                          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', height: '100%', padding: 0 }}>
+                            <TouchableOpacity>
+                              <Image style={{ height: 20, width: 20, marginLeft: 20, tintColor: '#4445ea', marginRight: 15 }} source={require('../images/call.png')} />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate('Whatsapp', { phone: hospital.phone })}>
+                              <Image style={{ height: 20, width: 20, marginLeft: 5, marginRight: 20, tintColor: '#4445ea' }} source={require('../images/chat.png')} />
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
                     </View>
-                  </View>
-                );
-              })}
+                  );
+                })
+              )}
             </View>
           </ScrollView>
         )}

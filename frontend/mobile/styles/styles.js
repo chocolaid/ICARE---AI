@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
     splashContainer: {
         height: '100%',
-        backgroundColor: '#4544EA',
+        backgroundColor: '#ffffff',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',

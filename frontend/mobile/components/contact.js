@@ -66,8 +66,8 @@ const EmergencyContactForm = () => {
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <Animated.View style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', height: '100%', opacity: fadeAnim }}>
-                    <View style={{ backgroundColor: '#4445ea' }}>
-                        <Text style={{ fontFamily: 'Blogger Sans-Medium', fontSize: 18, color: 'white', width: '100%', textAlign: 'center', marginTop: 20, marginBottom: 20 }}>Emergency Contacts</Text>
+                    <View style={{ backgroundColor: 'white' }}>
+                        <Text style={{ fontFamily: 'Blogger Sans-Medium', fontSize: 18, color: '#4445ea', width: '100%', textAlign: 'left', marginTop: 20, marginBottom: 20, marginLeft: 20, fontSize: 24 }}>Emergency Contacts</Text>
                     </View>
                     <View style={{ flex: 1, height: '100%', position: 'relative' }}>
                         <View style={{ backgroundColor: '#d3d3f2', marginHorizontal: 10, marginVertical: 10, borderRadius: 10, padding: 10 }}>
@@ -79,7 +79,7 @@ const EmergencyContactForm = () => {
                                 <Text style={{ fontFamily: 'Blogger Sans-Bold', fontSize: 16, color: '#4445ea', marginBottom: 10 }}>Add a New Contact</Text>
                                 <View style={{ flexDirection: 'column', alignItems: 'center', marginBottom: 10 }}>
                                     <TextInput
-                                        style={{ flex: 1, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, width: '100%' }}
+                                        style={{ flex: 1, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, width: '100%', marginBottom: 10 }}
                                         value={newContactName}
                                         onChangeText={setNewContactName}
                                         placeholder="Name"

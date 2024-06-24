@@ -386,7 +386,7 @@ export default function Chat({ route }) {
               onChangeText={(msg) => setNewMsg(msg)}
             />
             <TouchableOpacity onPress={openImageLibrary}>
-              <Image style={{ height: 25, width: 25, tintColor: '#4544EA', marginRight: 5 }} source={require('../images/upload_image.png')} /> 
+              <Image style={{ height: 25, width: 25, tintColor: 'white', marginRight: 5 }} source={require('../images/upload_image.png')} /> 
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={styles.btnSend} onPress={handleSend}>

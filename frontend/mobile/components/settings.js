@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Text, View, ScrollView, TouchableOpacity, Image, StyleSheet, Dimensions, Switch, Alert, Modal, Button} from "react-native";
 import { auth } from '../firebaseConfig';
 import CheckBox from '@react-native-community/checkbox';
@@ -31,7 +31,38 @@ export default function Settings() {
         doNothing: false,
         messageNearestHospitals: false,
     });
+    const [calibrationProgress, setCalibrationProgress] = useState(0);
     const navigation = useNavigation();
+
+    const calibrationProgressRef = useRef(0);
+    const calibrationIntervalRef = useRef(null);
+
+    // Load completed stages from AsyncStorage
+  useEffect(() => {
+    const loadCompletedStages = async () => {
+      try {
+        const storedProgress = await AsyncStorage.getItem('calibrationProgress');
+        if (storedProgress) {
+          calibrationProgressRef.current = JSON.parse(storedProgress);
+        }
+      } catch (error) {
+        console.error('Error loading completed stages:', error);
+      }
+    };
+    loadCompletedStages();
+  }, []);
+
+  // Save completed stages to AsyncStorage
+  useEffect(() => {
+    const saveCompletedStages = async () => {
+      try {
+        await AsyncStorage.setItem('calibrationProgress', JSON.stringify(calibrationProgressRef.current));
+      } catch (error) {
+        console.error('Error saving completed stages:', error);
+      }
+    };
+    saveCompletedStages();
+  }, [calibrationProgressRef.current]);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -120,7 +151,7 @@ export default function Settings() {
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            navigation.navigate('Login'); // navigate to login screen after logout
+            navigation.navigate('Login'); 
         } catch (error) {
             console.error("Error signing out", error);
         }
@@ -128,13 +159,11 @@ export default function Settings() {
 
     const handleDeleteData = async () => {
         try {
-            // Delete user data from Firebase Realtime Database
             const database = getDatabase();
             const user = auth.currentUser;
             if (user) {
                 const userRef = ref(database, "users/" + user.uid);
 
-                // Optionally, delete user authentication data
                 try {
                     await user.delete();
                     await remove(userRef);
@@ -176,10 +205,10 @@ export default function Settings() {
     return (
         <View style={styles.container}>
             <View style={styles.userInfoBg}>
-                <Text style={{ width: '100%', textAlign: 'center', marginBottom: 15, fontSize: 20, color: 'white', fontFamily: 'Blogger Sans-Bold' }}>Settings</Text>
-                <Text style={{ color: 'white', fontSize: 18, fontFamily: 'BloggerSans', marginBottom: 5 }}>{loading ? 'Loading...' : userData ? userData.fullName : 'Guest'}</Text>
-                <Text style={{ color: 'white', fontSize: 18, fontFamily: 'BloggerSans', marginBottom: 5 }}>{loading ? 'Loading...' : userData ? userData.email : 'Guest.email@icare.com.ng'}</Text>
-                <Text style={{ color: 'white', fontSize: 18, fontFamily: 'BloggerSans' }}>{loading ? 'Loading...' : userData ? userData.phone || '' : 'No number added'}</Text>
+                <Text style={{ width: '100%', textAlign: 'left', marginBottom: 15, fontSize: 20, color: '#4445ea', fontFamily: 'Blogger Sans-Bold' }}>Settings</Text>
+                <Text style={{ color: '#4445ea', fontSize: 18, fontFamily: 'BloggerSans', marginBottom: 5 }}>{loading ? 'Loading...' : userData ? userData.fullName : 'Guest'}</Text>
+                <Text style={{ color: '#4445ea', fontSize: 18, fontFamily: 'BloggerSans', marginBottom: 5 }}>{loading ? 'Loading...' : userData ? userData.email : 'Guest.email@icare.com.ng'}</Text>
+                <Text style={{ color: '#4445ea', fontSize: 18, fontFamily: 'BloggerSans' }}>{loading ? 'Loading...' : userData ? userData.phone || '' : 'No number added'}</Text>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.section}>
@@ -279,6 +308,18 @@ export default function Settings() {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.section}>
+                    <TouchableOpacity onPress={() => navigation.navigate('CaliberateSensors')}>
+                        <View style={[styles.sectionOption, { alignItems: 'center' }]}>
+                            <Image style={styles.optionIcon} source={require('../images/sensors.png')} />
+                            <View style={{ display: 'flex', flexDirection: 'column' }}>
+                                <Text style={styles.optionText}>Calibrate Sensors</Text>
+                                <Text lineBreakMode="tail" style={{ marginLeft: 5, color: '#616161', fontSize: 14, fontFamily: 'BloggerSans' }}>Calibrate your phone's sensors to improve accuracy.</Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+                
+                <View style={styles.section}>
                     <TouchableOpacity onPress={handleLogout}>
                         <View style={[styles.sectionOption, { alignItems: 'center' }]}>
                             <Image style={[styles.optionIcon, { tintColor: 'red' }]} source={require('../images/logout.png')} />
@@ -367,12 +408,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#e0e0e0',
     },
     userInfoBg: {
-        backgroundColor: '#4544EA',
+        backgroundColor: '#ffffff',
         height: height / 4.7,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-end',
-        paddingBottom: height / 30,
+        paddingBottom: height / 35,
         paddingLeft: width * 0.04
     },
     section: {
@@ -391,7 +432,7 @@ const styles = StyleSheet.create({
         height: 30,
         width: 30,
         marginHorizontal: 3.5,
-        tintColor: '#000000'
+        tintColor: '#4445ea'
     },
     optionText: {
         color: '#000000',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Text, View, StyleSheet, Button, StatusBar, Image, Alert, PermissionsAndroid, Vibration } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -20,25 +20,29 @@ import NearbyHospitalsMap from './components/NearbyHospitalsMap';
 import Map from './components/map';
 import Whatsapp from './components/whatsapp';
 import MedicalRecord from './components/MedicalRecord';
-import CustomMedMessage from './components/customMedMessage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Accelerometer, Gyroscope, Barometer } from 'expo-sensors';
+import { Accelerometer, Gyroscope, Barometer, Magnetometer } from 'expo-sensors';
 import * as Location from 'expo-location';
-import OpenCage from 'opencage-api-client';
 import Emergency from './components/e';
 import * as Notifications from 'expo-notifications';
 import EmergencyContactForm from './components/contact';
 import SplashScreen from 'react-native-splash-screen';
 import Cancerx from './components/cancerx';
+import CalibrationScreen from './components/caliberationScreen';
+import BackgroundFetch from 'react-native-background-fetch';
 
-
+// Constants
 const ACCELERATION_THRESHOLD = 1.8; 
 const ANGULAR_VELOCITY_THRESHOLD = 0.5; 
 const BAROMETER_DROP_THRESHOLD = 5; 
 const FILTER_FACTOR = 0.1;
-const TIME_THRESHOLD_FOR_RAPID_DROP = 0.5;
-const OPEN_CAGE_API_KEY = '3dd85c7722814333942dc3cdbae6a00b';
+const TIME_THRESHOLD_FOR_RAPID_DROP = 0.5; 
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCyjxgCh_Q8aDAApAVUmpVfwxfoBBjYe4Q';
+const MAGNETOMETER_THRESHOLD = 5;
+const RAPID_MAGNETIC_CHANGE_THRESHOLD = 10;
+const CALIBRATION_DATA_KEY = 'calibrationData';
 
+// Sensor Data Functions
 function lowPassFilter(data, previousValue = { x: 0, y: 0, z: 0 }) {
   return {
     x: previousValue.x * (1 - FILTER_FACTOR) + data.x * FILTER_FACTOR,
@@ -62,88 +66,206 @@ function calculateAngularVelocity(gyroscopeData) {
     gyroscopeData.z * gyroscopeData.z
   );
 }
+
+function calculateMagneticFieldMagnitude(magnetometerData) {
+  return Math.sqrt(
+    magnetometerData.x * magnetometerData.x +
+    magnetometerData.y * magnetometerData.y +
+    magnetometerData.z * magnetometerData.z
+  );
+}
+
+function calculateLateralAcceleration(accelerometerData) {
+  return Math.sqrt(accelerometerData.x * accelerometerData.x + accelerometerData.y * accelerometerData.y); 
+}
+
+function calculateYawRate(gyroscopeData) {
+  return gyroscopeData.z;
+}
+
+// Place Details Fetching
+const fetchPlaceDetails = async (placeId, apiKey) => {
+  const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${apiKey}`;
+  
+  try {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Error fetching place details: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.error_message) {
+      throw new Error(`Error fetching place details: ${data.error_message}`);
+    }
+    
+    return data.result;
+  } catch (error) {
+    console.error("Error fetching place details:", error);
+    throw error;
+  }
+};
+
+// Vehicle Detection
 async function isUserInVehicle(gpsData) {
   try {
     if (gpsData.speed > 10) { 
       return true;
     } else {
-      const geocoding = new OpenCage({ key: OPEN_CAGE_API_KEY });
-      const response = await geocoding.reverseGeocode(gpsData.latitude, gpsData.longitude);
-      if (response.results.length > 0) {
-        const roadType = response.results[0].road;
-        if (roadType && roadType !== 'no' && roadType !== 'unknown') {
-          return true;
-        }
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Location permission not granted.');
+        return false;
+      }
+      const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
+      const placeId = location.placeId;
+      const placeDetails = await fetchPlaceDetails(placeId, GOOGLE_MAPS_API_KEY);
+      
+      if (placeDetails && placeDetails.types && placeDetails.types.includes('route')) {
+        return true;
       }
     }
     return false;
   } catch (error) {
-    console.error('Error getting GPS data or OpenCage response:', error);
-    return false;
-  }
-}
-function detectAccident(
-  accelerometerData,
-  gyroscopeData,
-  barometerData,
-  gpsData
-) {
-  const filteredAccel = lowPassFilter(accelerometerData);
-  const filteredGyro = lowPassFilter(gyroscopeData);
-  const accelMagnitude = calculateAccelMagnitude(filteredAccel);
-  const angularVelocity = calculateAngularVelocity(filteredGyro);
-  const isVehicle = isUserInVehicle(gpsData);
-  let isAccident =
-    accelMagnitude > ACCELERATION_THRESHOLD &&
-    angularVelocity > ANGULAR_VELOCITY_THRESHOLD &&
-    isVehicle;
-  if (barometerData && barometerData.pressure) {
-    const pressureDrop = Math.abs(barometerData.pressure - previousBarometerPressure);
-    if (pressureDrop > BAROMETER_DROP_THRESHOLD) {
-      isAccident = true; 
-    }
-    if (pressureDrop > 2 * BAROMETER_DROP_THRESHOLD && timeSinceLastBarometerReading < TIME_THRESHOLD_FOR_RAPID_DROP) {
-      isAccident = true;
-    }
-  }
-  if (isAccident) {
-    if (previousAccident) {
-      ACCELERATION_THRESHOLD *= 1.2;
-      ANGULAR_VELOCITY_THRESHOLD *= 1.2;
-    }
-    previousAccident = true;
-    return true;
-  } else {
-    if (previousAccident) {
-      ACCELERATION_THRESHOLD /= 1.2;
-      ANGULAR_VELOCITY_THRESHOLD /= 1.2;
-    }
-    previousAccident = false;
+    console.error('Error getting location or Place Details:', error);
     return false;
   }
 }
 
+// Default Calibration Data
+const DEFAULT_CALIBRATION_DATA = {
+  avgAccel: 1.0,
+  avgGyro: 0.1,
+  avgBaro: 1013.25, 
+  avgMag: 50,
+  location: { latitude: 0, longitude: 0 }, 
+};
+
+// Accident Detection
+function detectAccident(
+  previousBarometerPressure,
+  timeSinceLastBarometerReading,
+  previousAccident,
+  previousMagneticField,
+  timeSinceLastMagneticReading,
+  magneticFieldChangeThreshold,
+  gpsData,
+  previousGpsData,
+  calibrationData
+) {
+  let isAccident = false;
+  let adjustedAccelerationThreshold = ACCELERATION_THRESHOLD;
+  let adjustedAngularVelocityThreshold = ANGULAR_VELOCITY_THRESHOLD;
+  let adjustedBarometerDropThreshold = BAROMETER_DROP_THRESHOLD;
+  let adjustedMagneticFieldChangeThreshold = magneticFieldChangeThreshold;
+
+  if (previousAccident) {
+    adjustedAccelerationThreshold *= 1.2;
+    adjustedAngularVelocityThreshold *= 1.2;
+  } else {
+    adjustedAccelerationThreshold = ACCELERATION_THRESHOLD;
+    adjustedAngularVelocityThreshold = ANGULAR_VELOCITY_THRESHOLD;
+  }
+  if (calibrationData) {
+    adjustedAccelerationThreshold -= (calibrationData.avgAccel * 0.1); 
+    adjustedAngularVelocityThreshold -= (calibrationData.avgGyro * 0.05);
+    adjustedBarometerDropThreshold -= (calibrationData.avgBaro * 0.01);
+    adjustedMagneticFieldChangeThreshold -= (calibrationData.avgMag * 0.02);
+  }
+  if (accelerometerData && gyroscopeData) {
+    const accelMagnitude = calculateAccelMagnitude(accelerometerData);
+    const angularVelocity = calculateAngularVelocity(gyroscopeData);
+    const isVehicle = isUserInVehicle(gpsData);
+    const lateralAcceleration = calculateLateralAcceleration(accelerometerData);
+    const yawRate = calculateYawRate(gyroscopeData);
+    if (gpsData.speed > 30) {
+      adjustedAccelerationThreshold *= 0.8;
+      adjustedAngularVelocityThreshold *= 0.8;
+    }
+    if (
+      accelMagnitude > adjustedAccelerationThreshold &&
+      angularVelocity > adjustedAngularVelocityThreshold &&
+      isVehicle &&
+      timeSinceLastBarometerReading < 0.2
+    ) {
+      isAccident = true;
+    }
+    if (lateralAcceleration > 2) {
+      isAccident = true;
+    }
+    if (Math.abs(yawRate) > 1) {
+      isAccident = true;
+    } 
+  }
+
+  // Barometer Check (Improved)
+  if (barometerData && barometerData.pressure) {
+    const pressureDrop = Math.abs(barometerData.pressure - previousBarometerPressure);
+
+    // Check for sudden pressure drop
+    if (pressureDrop > adjustedBarometerDropThreshold * 2 && timeSinceLastBarometerReading < TIME_THRESHOLD_FOR_RAPID_DROP) {
+      isAccident = true; 
+    } else if (pressureDrop > adjustedBarometerDropThreshold) {
+      isAccident = true; 
+    }
+  }
+
+  // Magnetometer Check (Improved)
+  if (previousMagneticField) {
+    const magneticFieldChange = Math.abs(
+      calculateMagneticFieldMagnitude(magnetometerData) - previousMagneticField
+    );
+    if (magneticFieldChange > adjustedMagneticFieldChangeThreshold) {
+      // Check if the magnetic field change occurred rapidly
+      if (timeSinceLastMagneticReading < 0.2) {
+        isAccident = true; 
+      } else {
+        // Magnetic field change was gradual, might not be an accident
+      }
+    }
+  }
+
+  // Calculate Speed Change
+  if (previousGpsData && gpsData) {
+    const speedChange = Math.abs(gpsData.speed - previousGpsData.speed);
+
+    // Check for significant speed change (sudden braking)
+    if (speedChange > 5) { 
+      isAccident = true; 
+
+      // Adjust thresholds for other sensors based on speed change
+      if (speedChange > 10) { 
+        adjustedAccelerationThreshold *= 0.7; 
+        adjustedAngularVelocityThreshold *= 0.7;
+      } else if (speedChange > 5) {
+        adjustedAccelerationThreshold *= 0.8;
+        adjustedAngularVelocityThreshold *= 0.8;
+      }
+    }
+  }
+
+  if (isAccident) {
+    previousAccident = true; 
+    ACCELERATION_THRESHOLD *= 1.2; 
+    magneticFieldChangeThreshold = RAPID_MAGNETIC_CHANGE_THRESHOLD;
+  } else {
+    previousAccident = false; 
+    ACCELERATION_THRESHOLD /= 1.2; 
+    magneticFieldChangeThreshold = MAGNETOMETER_THRESHOLD; 
+  }
+
+  return isAccident;
+}
+
+// Settings Screen Component
 function SettingsScreen() {
   return (
     <Settings />
-  )
-  
-}
-
-function FullScreenComponent({ navigation }) {
-  React.useEffect(() => {
-    navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
-
-    return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex' } });
-  }, [navigation]);
-
-  return (
-    <View style={styles.screenContainer}>
-      <Text>This is a Full Screen Component!</Text>
-    </View>
   );
 }
 
+// Tab Navigator Component
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -157,8 +279,6 @@ function TabNavigator() {
         backgroundColor: '#ffffff'
       },
       tabBarHideOnKeyboard: true
-
-      
     }}>
       <Tab.Screen 
         name="Home" 
@@ -169,7 +289,6 @@ function TabNavigator() {
             onError={(e) => console.log('Image Load Error:', e.nativeEvent.error)}
             />
           ),
-          
         }} 
       />
       
@@ -201,13 +320,11 @@ function TabNavigator() {
           ),
         }} 
       />
-      
     </Tab.Navigator>
   );
 }
 
-
-
+// App Component
 export default function App() {
   const [user, setUser] = useState(null);
   const [isSplashVisible, setSplashVisible] = useState(true);
@@ -220,9 +337,35 @@ export default function App() {
   const [timeSinceLastBarometerReading, setTimeSinceLastBarometerReading] = useState(0);
   const [gpsData, setGpsData] = useState(null);
   const [previousAccident, setPreviousAccident] = useState(false);
+  const [previousMagneticField, setPreviousMagneticField] = useState(null);
+  const [timeSinceLastMagneticReading, setTimeSinceLastMagneticReading] = useState(0);
+  const [magneticFieldChangeThreshold, setMagneticFieldChangeThreshold] = useState(MAGNETOMETER_THRESHOLD);
+  const [previousGpsData, setPreviousGpsData] = useState(null);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [countdownStarted, setCountdownStarted] = useState(false);
+  const countdownIntervalRef = useRef(null);
+  const [calibrationData, setCalibrationData] = useState(DEFAULT_CALIBRATION_DATA);
+  const [accelerometerData, setAccelerometerData] = useState(null);
+  const [gyroscopeData, setGyroscopeData] = useState(null);
+  const [barometerData, setBarometerData] = useState(null);
+  const [magnetometerData, setMagnetometerData] = useState(null); 
+
+  // Load Calibration Data from AsyncStorage
   useEffect(() => {
-    SplashScreen.hide();
-}, []);
+    const loadCalibrationData = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem(CALIBRATION_DATA_KEY);
+        if (storedData) {
+          setCalibrationData(JSON.parse(storedData));
+        }
+      } catch (error) {
+        console.error('Error loading calibration data:', error);
+      }
+    };
+    loadCalibrationData();
+  }, []);
+
+  // Request Location Permissions
   async function requestPermissions() {
     try {
       const granted = await PermissionsAndroid.request(
@@ -244,6 +387,8 @@ export default function App() {
       console.warn(err);
     }
   }
+
+  // Load Settings from AsyncStorage
   const loadSettings = async () => {
     try {
       const gyroValue = await AsyncStorage.getItem('isGyroscopeEnabled');
@@ -259,25 +404,45 @@ export default function App() {
     }
   };
 
+  // Handle Countdown Logic
+  const handleCountdown = () => {
+    if (countdownSeconds > 0) {
+      setCountdownSeconds(countdownSeconds - 1);
+    } else {
+      Vibration.vibrate(5000);
+      navigation.navigate('Emergency', {lastPrompt: 'Possible Accident Detected.', vibrate: true});
+      setShowCountdownDialog(false);
+      setCountdownStarted(false);
+      clearInterval(countdownIntervalRef.current); 
+    }
+  };
+
+  // Manage Sensor Subscriptions and Location Updates
   useEffect(() => {
     let accelerometerSubscription = null;
     let gyroscopeSubscription = null;
     let barometerSubscription = null;
+    let magnetometerSubscription = null;
     let locationSubscription = null;
 
     if (isGyroscopeEnabled) {
       accelerometerSubscription = Accelerometer.addListener(
         (accelerometerData) => {
-          if (gyroscopeSubscription && barometerSubscription && gpsData) {
+          setAccelerometerData(accelerometerData); 
+          if (gyroscopeSubscription && barometerSubscription && magnetometerSubscription && gpsData) {
             const isAccident = detectAccident(
-              accelerometerData,
-              gyroscopeData,
-              barometerData,
-              gpsData
+              previousBarometerPressure,
+              timeSinceLastBarometerReading,
+              previousAccident,
+              previousMagneticField,
+              timeSinceLastMagneticReading,
+              magneticFieldChangeThreshold,
+              gpsData,
+              previousGpsData,
+              calibrationData 
             );
             if (isAccident) {
-              setShowCountdownDialog(true);
-              setCountdownSeconds(10);
+              setShowConfirmationDialog(true); 
             }
           }
         }
@@ -285,16 +450,21 @@ export default function App() {
 
       gyroscopeSubscription = Gyroscope.addListener(
         (gyroscopeData) => {
-          if (accelerometerSubscription && barometerSubscription && gpsData) {
+          setGyroscopeData(gyroscopeData);
+          if (accelerometerSubscription && barometerSubscription && magnetometerSubscription && gpsData) {
             const isAccident = detectAccident(
-              accelerometerData,
-              gyroscopeData,
-              barometerData,
-              gpsData
+              previousBarometerPressure,
+              timeSinceLastBarometerReading,
+              previousAccident,
+              previousMagneticField,
+              timeSinceLastMagneticReading,
+              magneticFieldChangeThreshold,
+              gpsData,
+              previousGpsData,
+              calibrationData 
             );
             if (isAccident) {
-              setShowCountdownDialog(true);
-              setCountdownSeconds(10);
+              setShowConfirmationDialog(true);
             }
           }
         }
@@ -302,27 +472,56 @@ export default function App() {
 
       barometerSubscription = Barometer.addListener(
         (barometerData) => {
-          setPreviousBarometerPressure(barometerData.pressure); // Store pressure for drop detection
+          setBarometerData(barometerData); 
+          setPreviousBarometerPressure(barometerData.pressure);
           setTimeSinceLastBarometerReading(0);
-          if (accelerometerSubscription && gyroscopeSubscription && gpsData) {
+          if (accelerometerSubscription && gyroscopeSubscription && magnetometerSubscription && gpsData) {
             const isAccident = detectAccident(
-              accelerometerData,
-              gyroscopeData,
-              barometerData,
-              gpsData
+              previousBarometerPressure,
+              timeSinceLastBarometerReading,
+              previousAccident,
+              previousMagneticField,
+              timeSinceLastMagneticReading,
+              magneticFieldChangeThreshold,
+              gpsData,
+              previousGpsData,
+              calibrationData 
             );
             if (isAccident) {
-              setShowCountdownDialog(true);
-              setCountdownSeconds(10);
+              setShowConfirmationDialog(true); 
             }
           }
         }
       );
 
-      // Get location updates
+      magnetometerSubscription = Magnetometer.addListener(
+        (magnetometerData) => {
+          setMagnetometerData(magnetometerData); 
+          setPreviousMagneticField(magnetometerData);
+          setTimeSinceLastMagneticReading(0);
+          if (accelerometerSubscription && gyroscopeSubscription && barometerSubscription && gpsData) {
+            const isAccident = detectAccident(
+              previousBarometerPressure,
+              timeSinceLastBarometerReading,
+              previousAccident,
+              previousMagneticField,
+              timeSinceLastMagneticReading,
+              magneticFieldChangeThreshold,
+              gpsData,
+              previousGpsData,
+              calibrationData 
+            );
+            if (isAccident) {
+              setShowConfirmationDialog(true); 
+            }
+          }
+        }
+      );
+
       locationSubscription = Location.watchPositionAsync(
         { accuracy: Location.Accuracy.BestForNavigation, distanceInterval: 10 },
         (location) => {
+          setPreviousGpsData(gpsData); 
           setGpsData(location.coords);
         }
       );
@@ -338,18 +537,21 @@ export default function App() {
       if (barometerSubscription) {
         barometerSubscription.remove();
       }
+      if (magnetometerSubscription) {
+        magnetometerSubscription.remove();
+      }
       if (locationSubscription) {
         locationSubscription.remove();
       }
     };
   }, [isGyroscopeEnabled]);
 
-  // Timer for barometer reading
   useEffect(() => {
     let interval = null;
     if (isGyroscopeEnabled) {
       interval = setInterval(() => {
         setTimeSinceLastBarometerReading((prevTime) => prevTime + 0.1);
+        setTimeSinceLastMagneticReading((prevTime) => prevTime + 0.1); 
       }, 100);
     }
 
@@ -358,26 +560,20 @@ export default function App() {
     };
   }, [isGyroscopeEnabled]);
 
-  const handleCountdown = () => {
-    if (countdownSeconds > 0) {
-      setCountdownSeconds(countdownSeconds - 1);
-    } else {
-      Vibration.vibrate(5000);
-      navigation.navigate('Emergency', {lastPrompt: 'Possible Accident Detected.'});
-      setShowCountdownDialog(false);
-    }
-  };
-
+  // Countdown Timer
   useEffect(() => {
     let interval = null;
     if (showCountdownDialog) {
       interval = setInterval(handleCountdown, 1000);
+      countdownIntervalRef.current = interval; 
     } else {
       clearInterval(interval);
+      countdownIntervalRef.current = null;
     }
     return () => clearInterval(interval);
   }, [showCountdownDialog, countdownSeconds]);
 
+  // Authentication and Splash Screen
   useEffect(() => {
     requestPermissions();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -387,8 +583,8 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  // Get Notification Permissions
   useEffect(() => {
-    // Get notification permission
     const { status: existingStatus } = Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
     if (existingStatus !== 'granted') {
@@ -406,11 +602,10 @@ export default function App() {
     }
   }, []);
 
+  // Handle Received Notifications
   const handleNotification = async (notification) => {
     if (notification.request.content.title === 'Emergency Alert') {
-      // Trigger an emergency response
       Alert.alert('Emergency Alert', 'Please seek immediate medical assistance!');
-      // You can also navigate to the Emergency screen here
     }
   };
 
@@ -419,6 +614,101 @@ export default function App() {
     return () => subscription.remove();
   }, []);
 
+  // Background Fetch Task Logic
+  const backgroundFetchTask = async () => {
+    try {
+      // Update sensor readings
+      const { x, y, z } = await Accelerometer.getCurrentAccelerometerAsync();
+      setAccelerometerData({ x, y, z });
+
+      const { x: gyroX, y: gyroY, z: gyroZ } = await Gyroscope.getCurrentGyroscopeAsync();
+      setGyroscopeData({ x: gyroX, y: gyroY, z: gyroZ });
+
+      const { pressure } = await Barometer.getCurrentBarometerAsync();
+      setBarometerData({ pressure });
+
+      const { x: magX, y: magY, z: magZ } = await Magnetometer.getCurrentMagnetometerAsync();
+      setMagnetometerData({ x: magX, y: magY, z: magZ });
+
+      const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.BestForNavigation });
+      setPreviousGpsData(gpsData);
+      setGpsData(location.coords);
+
+      // Call detectAccident with updated sensor data
+      const isAccident = detectAccident(
+        previousBarometerPressure,
+        timeSinceLastBarometerReading,
+        previousAccident,
+        previousMagneticField,
+        timeSinceLastMagneticReading,
+        magneticFieldChangeThreshold,
+        gpsData,
+        previousGpsData,
+        calibrationData
+      );
+
+      // Handle accident detection result
+      if (isAccident) {
+        setShowConfirmationDialog(true); 
+      }
+    } catch (error) {
+      console.error('Error in background fetch task:', error);
+    }
+
+    // Tell the OS that we're done.
+    BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA);
+  };
+
+  // Initialize Background Fetch
+  useEffect(() => {
+    BackgroundFetch.configure({
+      minimumFetchInterval: 15, 
+      stopOnTerminate: false, 
+      startOnBoot: true, 
+      forceReload: false, 
+      enableHeadless: true,  
+      requiresCharging: false, 
+      requiresNetwork: false, 
+      requiresBatteryNotLow: false, 
+      stopOnNetworkStateChange: false 
+    }, (taskId) => {
+      console.log('[BackgroundFetch] Received background fetch event: taskId', taskId);
+      backgroundFetchTask(); 
+    }, (error) => {
+      console.log('[BackgroundFetch] BackgroundFetch.configure error:', error);
+    });
+
+    // Start Background Fetch 
+    if (isGyroscopeEnabled) {
+      BackgroundFetch.start().then(() => console.log('Background Fetch started!'));
+    }
+
+    // Stop Background Fetch on component unmount
+    return () => {
+      if (isGyroscopeEnabled) {
+        BackgroundFetch.stop().then(() => console.log('Background Fetch stopped!'));
+      }
+    };
+  }, [isGyroscopeEnabled]);
+
+  // Send Emergency Notification (This is commented out as it was incomplete in the original code)
+  // const sendEmergencyNotification = async () => {
+  //   try {
+  //     if (notificationToken) {
+  //       await Notifications.sendNotificationAsync({
+  //         to: notificationToken,
+  //         title: 'Emergency Alert',
+  //         body: 'Possible accident detected. Please check on the user.',
+  //         data: { emergency: true
+  //         },
+  //       });
+  //     } else {
+  //       console.warn('No notification token available.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error sending emergency notification:', error);
+  //   }
+  // };
 
   const saveSettings = async () => {
     try {
@@ -428,13 +718,9 @@ export default function App() {
       console.error('Error saving settings', error);
     }
   };
-
-  // Save settings on change
   useEffect(() => {
     saveSettings();
   }, [isGyroscopeEnabled, notificationsEnabled]);
-
-  // Load settings on app startup
   useEffect(() => {
     loadSettings();
   }, []);
@@ -442,7 +728,7 @@ export default function App() {
   if (isSplashVisible) {
     return (
       <>
-        <StatusBar backgroundColor="#3b3ae8" barStyle="light-content" />
+        <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
         <SplashScreen1 />
       </>
     );
@@ -450,12 +736,11 @@ export default function App() {
 
   return (
     <NavigationContainer ref={(navigation) => { this.navigation = navigation; }}>
-      <StatusBar backgroundColor="#3b3ae8" barStyle="light-content" />
+      <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <>
             <Stack.Screen name="Tabs" component={TabNavigator} />
-            <Stack.Screen name="FullScreen" component={FullScreenComponent} />
             <Stack.Screen name="FullNews" component={FullNewsScreen} />
             <Stack.Screen name="ChatScreen" component={Chat} />
             <Stack.Screen name="CanceRx" component={Cancerx} />
@@ -464,25 +749,39 @@ export default function App() {
             <Stack.Screen name="NearbyHospitalsMap" component={NearbyHospitalsMap} />
             <Stack.Screen name="Map" component={Map} />
             <Stack.Screen name="Whatsapp" component={Whatsapp} />
+            <Stack.Screen name="CaliberateSensors" component={CalibrationScreen} />
             <Stack.Screen name="MedicalRecord" component={MedicalRecord} />
             <Stack.Screen name="customMedMessage" component={EmergencyContactForm} />
-            
             <Stack.Screen name="Emergency" component={Emergency} />
           </>
         ) : (
           <Stack.Screen name="Login" component={Login} />
         )}
       </Stack.Navigator>
-      {/* Countdown Dialog */}
       {showCountdownDialog && (
         <View style={styles.countdownDialog}>
           <Text style={styles.countdownText}>Emergency in {countdownSeconds} seconds</Text>
         </View>
       )}
+      {showConfirmationDialog && (
+        <View style={styles.confirmationDialog}>
+          <Text style={styles.confirmationText}>Possible Accident Detected. Confirm?</Text>
+          <Button title="Yes" onPress={() => {
+            setShowConfirmationDialog(false);
+            setShowCountdownDialog(true);
+            setCountdownStarted(true);
+          }} />
+          <Button title="No" onPress={() => setShowConfirmationDialog(false)} />
+          {showCountdownDialog && (
+            <View>
+              <Text style={styles.countdownText}>Emergency in {countdownSeconds} seconds</Text>
+            </View>
+          )}
+        </View>
+      )}
     </NavigationContainer>
   );
 }
-
 
 const styles = StyleSheet.create({
   splashContainer: {
@@ -511,8 +810,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   countdownText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
+    marginTop: 20,
+  },
+  confirmationDialog: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  confirmationText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 20,
   },
 });

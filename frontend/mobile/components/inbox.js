@@ -57,15 +57,15 @@ const Inbox = () => {
     return (
         <View style={styles.container}>
             <View style={styles.searchBar}>
-                <Text style={styles.title}>Inbox</Text>
-                <View style={styles.searchInputContainer}>
+                {/* <View style={styles.searchInputContainer}>
                     <TextInput 
                         placeholder="Search messages" 
                         style={styles.searchInput} 
                         value={searchQuery}
                         onChangeText={handleSearch}
                     />
-                </View>
+                </View> */}
+                <Text style={[styles.title, {textAlign: 'left', width: '100%', marginTop: 0, marginBottom: 0, fontSize: 26}]}>Inbox</Text>
             </View>
 
             <View style={styles.chatListContainer}>
@@ -118,27 +118,29 @@ const styles = StyleSheet.create({
         flexDirection: 'column'
     },
     searchBar: {
-        backgroundColor: '#4544EA',
-        height: Dimensions.get('window').height / 5,
         justifyContent: "center",
-        alignItems: 'center'
+        alignItems: 'center',
+        marginHorizontal: 10,
+        marginVertical: 20,
     },
     title: {
+        color: '#4445ea',
+        fontSize: 18,
         fontFamily: 'Blogger Sans-Bold',
-        fontSize: 26,
-        color: 'white',
-        width: '100%',
-        textAlign: 'center',
-        marginTop: Dimensions.get('window').height / 60,
-        marginBottom: Dimensions.get('window').height / 30
     },
     searchInputContainer: {
-        backgroundColor: 'rgba(255,255,255,1)',
-        width: Dimensions.get('window').width / 1.2,
+        backgroundColor: 'white',
+        width: Dimensions.get('window').width / 1.05,
         padding: 4,
-        elevation: 1,
-        shadowColor: '#700B97',
-        borderRadius: 4
+        elevation: 2,
+        shadowColor: '#000',
+        borderRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        
     },
     searchInput: {
         padding: 2,

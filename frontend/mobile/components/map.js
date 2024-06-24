@@ -218,3 +218,5 @@ infoText: {
   marginVertical: 2,
 },
 });
+
+export {GOOGLE_MAPS_API_KEY}

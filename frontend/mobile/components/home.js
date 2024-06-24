@@ -183,23 +183,24 @@ const HomeScreen = ({ navigation }) => {
       });
 
       const result = await chat.sendMessage([{ text: t }]);
-const response = await result.response;
-let text = await response.text();
+      const response = await result.response;
+      const text = await response.text();
+      const jsonStart = text.indexOf('```json');
+      const jsonEnd = text.lastIndexOf('```');
 
-// Use regex to find JSON block
-const jsonMatch = text.match(/```json([\s\S]*?)```/);
-if (jsonMatch) {
-  let jsonText = jsonMatch[1].replace(/[\u0000-\u001F]+/g, ""); // Removing control characters
-  try {
-    const json = JSON.parse(jsonText);
-    if (json.emergency) {
-      text = json.message;
-      navigation.navigate('Emergency', { lastPrompt: t, aiResponse: text });
-    }
-  } catch (error) {
-    console.error("Error parsing JSON:", error);
-  }
-}
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        const jsonText = text.substring(jsonStart + 7, jsonEnd);
+        jsonText = jsonText.replace(/[\u0000-\u001F]+/g, "");
+        try {
+          const json = JSON.parse(jsonText);
+          if (json.emergency) {
+            text = json.message;
+            navigation.navigate('Emergency', { lastPrompt: t, aiResponse: text });
+          }
+        } catch (error) {
+          console.error("Error parsing JSON:", error);
+        }
+      }
 
       const aiMessage = {
         id: messages.length + 2,
@@ -237,19 +238,17 @@ if (jsonMatch) {
       });
   
       try {
-        // Step 1: Upload recorded audio to your server
         const response = await fetch('http://icare-server.us.to/audio-receiver', {
           method: 'POST',
           body: formData,
           timeout: 60000
         });
-        const data = await response.json(); // Assuming the server responds with JSON
+        const data = await response.json();
   
         console.log('Audio receiver response:', data);
   
         if (data.transcript) {
           try {
-            // Step 2: Process transcript and send to TTS synthesis endpoint
             const answerText = await Answer(data.transcript);
             const ttsResponse = await fetch('http://151.80.93.105:3301/synthesize', {
               method: 'POST',
@@ -260,7 +259,7 @@ if (jsonMatch) {
             });
   
             // Handle the TTS synthesis response
-            const ttsData = await ttsResponse.json(); // Parse the JSON response
+            const ttsData = await ttsResponse.json();
   
             console.log('TTS synthesis response:', ttsData);
   
@@ -313,7 +312,7 @@ if (jsonMatch) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>Hold the mic button and start speaking</Text>
+      <Text style={[styles.titleText, {textAlign: 'left', width: '100%', marginTop: 0, marginBottom: 50, fontSize: 26}]}>ICARE</Text>
       <View style={styles.section1}>
         <Animated.View style={{ transform: [{ scale: ringScaleAnim1 }], ...styles.ring, opacity: 1}}>
           <Animated.View style={{ transform: [{ scale: ringScaleAnim2 }], ...styles.ring, opacity: 0.75 }}>
@@ -342,10 +341,12 @@ if (jsonMatch) {
           </Animated.View>
         </Animated.View>
       </View>
+      {!isPlaying && (<Text style={styles.titleText}>Hold the mic button and start speaking</Text>)}
+      
       {isPlaying && (
         <View style={styles.stopButtonContainer}>
-          <TouchableOpacity onPress={onStopPlay} style={{ width: 60, backgroundColor: 'white', height: 40, padding: 12, borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ color: 'red', fontFamily: 'Blogger Sans-Medium' }}>STOP</Text>
+          <TouchableOpacity onPress={onStopPlay} style={{ width: 60, backgroundColor: '#4445ea', height: 40, padding: 12, borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ color: 'white', fontFamily: 'Blogger Sans-Medium' }}>STOP</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -373,8 +374,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#4544EA',
-    paddingTop: 50,
+    backgroundColor: '#ffffff',
+    paddingTop: 20,
   },
   section1: {
     flex: 1,
@@ -383,7 +384,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   audioButton: {
-    backgroundColor: 'rgba(0,0,0, 0.05)',
+    backgroundColor: 'rgba(68, 69, 234, 0.85)',
     borderRadius: 360,
     height: 200,
     width: 200,
@@ -395,27 +396,29 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.6,
     shadowRadius: 2,
+    marginBottom: 20,
   },
   audioButtonImage: {
     width: 100,
+    tintColor: '#4445ea',
   },
   titleText: {
-    color: 'white',
-    fontSize: 24,
+    color: '#4445ea',
+    fontSize: 18,
     fontFamily: 'Blogger Sans-Bold',
     marginBottom: 10,
   },
   quickResponseButton: {
-    backgroundColor: '#4544EA',
+    backgroundColor: '#ffffff',
     padding: 15,
     marginVertical: 5,
     borderRadius: 10,
     alignItems: 'center',
   },
   quickResponseButtonText: {
-    color: 'white',
+    color: '#4445ea',
     fontFamily: 'Blogger Sans-Medium',
-    backgroundColor: 'rgba(0,0,0, 0.07)',
+    backgroundColor: 'rgba(0,0,0, 0.1)',
     padding: 15,
     borderRadius: 10,
   },
@@ -430,7 +433,7 @@ const styles = StyleSheet.create({
     height: 250,
     borderRadius: 125,
     borderWidth: 4.5,
-    borderColor: 'white',
+    borderColor: '#4445ea',
     alignItems: 'center',
     justifyContent: 'center',
   },

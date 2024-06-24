@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
         flexDirection: 'row',
-        backgroundColor: '#4544EA',
+        backgroundColor: 'white',
         paddingHorizontal: 10,
         paddingVertical: 10,
     },
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
       borderBottomColor: '#F5FCFF',
-      backgroundColor: '#FFFFFF',
+      backgroundColor: 'rgba(68, 68, 234, 0.05)',
       borderRadius: 18,
       borderBottomWidth: 1,
       flexDirection: 'row',
@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
       borderBottomColor: '#FFFFFF',
       flex: 1,
       paddingVertical: 10,
+      color: 'white',
   },
   balloon: {
       maxWidth: 250,

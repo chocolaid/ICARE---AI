@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, TextInput, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform, Keyboard, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -70,30 +70,24 @@ const CanceRx = () => {
         message: newMsg,
         image: selectedImage ? `data:${selectedImage.type};base64,${selectedImage.base64}` : null,
       };
-
+  
       setMessages([...messages, newMessage]);
       setNewMsg('');
       setInputHeight(40);
       flatListRef.current?.scrollToEnd({ animated: true });
       setImage(null);
-
+  
       if (selectedImage) {
         try {
           setLoading(true);
-          const formData = new FormData();
-          formData.append('file', {
-            uri: selectedImage.uri,
-            type: selectedImage.type,
-            name: selectedImage.fileName,
+  
+          const base64Image = selectedImage.base64;
+          const response = await axios.post('https://uncommon-ladybird-amazing.ngrok-free.app/predict', base64Image, {
+            headers: { 'Content-Type': 'application/octet-stream' },
           });
-
-          const response = await axios.post('http://151.80.93.105:7000/predict', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          });
-
+  
           const prediction = response.data.prediction;
-          const confidence = response.data.confidence;
-
+  
           const responseMessage = {
             id: messages.length + 2,
             date: new Date().toLocaleString('en-US', {
@@ -102,9 +96,9 @@ const CanceRx = () => {
               hour12: true,
             }),
             type: 'in',
-            message: `Prediction: ${prediction}\nConfidence: ${confidence}`,
+            message: `${prediction}`,
           };
-
+  
           setMessages((prevMessages) => [...prevMessages, responseMessage]);
         } catch (error) {
           console.error('Error uploading image:', error);
@@ -115,6 +109,7 @@ const CanceRx = () => {
       }
     }
   };
+
 
   const renderItem = ({ item }) => {
     if (item.image) {

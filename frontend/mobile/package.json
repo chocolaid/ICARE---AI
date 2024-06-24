@@ -54,6 +54,7 @@
     "react-native": "^0.74.1",
     "react-native-animatable": "^1.4.0",
     "react-native-audio-recorder-player": "^3.6.7",
+    "react-native-background-fetch": "^4.2.5",
     "react-native-fs": "^2.20.0",
     "react-native-geolocation-service": "^5.3.1",
     "react-native-gesture-handler": "^2.16.2",
