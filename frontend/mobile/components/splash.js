@@ -17,7 +17,7 @@ function SplashScreen1({ navigation }) {
         <Text style={{color: '#4445ea', fontSize: 70, marginBottom: 20, textAlign: 'center', fontFamily: 'Blogger Sans-Medium'}}>ICARE</Text>
         </View>
         <View>
-        <Text style={{color: '#4445ea', fontSize: 16, textAlign: 'center', fontFamily: 'Blogger Sans-Medium', marginBottom: 20}}>OECAPPS | SPECTRA </Text>
+        <Text style={{color: '#4445ea', fontSize: 14, textAlign: 'center', fontFamily: 'Blogger Sans-Medium', marginBottom: 20}}>OECAPPS | SPECTRA </Text>
         </View>
       </View>
 
