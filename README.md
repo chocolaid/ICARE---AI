@@ -1,4 +1,4 @@
-# Team-Spectra
+
 
 ## **ICARE:** Documentation<br/>
 Overview
